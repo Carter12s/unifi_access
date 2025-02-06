@@ -22,7 +22,7 @@ See the [docs](https://docs.rs/unifi_access/latest/unifi_access/) for more infor
 
 ## Other Unifi Clients
 
-Unifi's APIs are split in implementation and design. This crate is focused on the Unifi API for controller door access and door locks.
+Unifi's APIs are split in implementation and design. This crate is focused on the Unifi API for controlling door access and door locks.
 
  - If you are looking for a client for Unifi Network API checkout: [unifi-rs](https://github.com/CallumTeesdale/unifi-rs)
  - If you are looking for Security camera and NVR API checkout: [unifi-protect-rust](https://github.com/larsfroelich/unifi-protect-rust)
