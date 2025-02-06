@@ -1,30 +1,34 @@
-/// # Unifi Access API Client
-///
-/// This crate provides a client for the Unifi Access API based off of the documentation found here:
-/// https://core-config-gfoz.uid.alpha.ui.com/configs/unifi-access/api_reference.pdf
-///
-/// This crate is a hand written wrapper of the described REST API, and is incomplete in coverage at the moment.
-/// This crate was developed to support a Makerspace door access system and is being happily used in production for that application.
-///
-/// Contributions to extend the functionality are welcome.
-///
-/// To get started login to your Unifi Controller and go to:
-/// Settings -> Security -> Advanced and create a new token. There is a link to the documentation for the API alongside the token.
-///
-/// The API is only available on the LAN network of the controller, if you want to access the API from offsite you'll need to establish a VPN.
-///
-/// A basic example:
-/// ```no_run
-/// use unifi_access::UnifiClient;
-/// #[tokio::main(flavor = "current_thread")]
-/// async fn main() {
-///   let client = UnifiClient::new("192.168.1.1", "your_auth_token");
-///   let users = client.get_all_users().await.unwrap();
-///   println!("{users:?}");
-/// }
-/// ```
-///
-/// The API is fully async and technically relies on `tokio`, but tokio could be removed if folks want a different runtime.
+//! # Unifi Access API Client
+//!
+//! This crate provides a client for the Unifi Access API based off of the documentation found here:
+//!
+//! <https://core-config-gfoz.uid.alpha.ui.com/configs/unifi-access/api_reference.pdf>
+//!
+//! This crate is a hand written wrapper of the described REST API, and is incomplete in coverage at the moment.
+//! This crate was developed to support a Makerspace door access system and is being happily used in production for that application.
+//!
+//! Contributions to extend the functionality are welcome.
+//!
+//! To get started login to your Unifi Controller and go to:
+//! Settings -> Security -> Advanced and create a new token. There is a link to the documentation for the API alongside the token.
+//!
+//! The API is only available on the LAN network of the controller, if you want to access the API from offsite you'll need to establish a VPN.
+//!
+//! A basic example:
+//! ```no_run
+//! use unifi_access::UnifiClient;
+//! #[tokio::main]
+//! async fn main() {
+//!   let client = UnifiClient::new("192.168.1.1", "your_auth_token");
+//!   let users = client.get_all_users().await.unwrap();
+//!   println!("{users:?}");
+//! }
+//! ```
+//!
+//! Head to [UnifiClient] to see the available operations.
+//!
+//! The API is fully async and technically relies on `tokio`, but tokio could be removed if folks want a different runtime.
+
 use std::sync::Mutex;
 
 use log::*;
@@ -162,8 +166,10 @@ impl UnifiClient {
     /// Unifi Access's API is only available on the LAN network of the controller.
     /// The default port for Unifi Access is 12445.
     /// Unifi Access can only be reached over https
-    /// See: For full documentation of the API
-    /// https://core-config-gfoz.uid.alpha.ui.com/configs/unifi-access/api_reference.pdf
+    ///
+    /// For full documentation of the API see:
+    ///
+    /// <https://core-config-gfoz.uid.alpha.ui.com/configs/unifi-access/api_reference.pdf>
     pub fn new(hostname: &str, key: &str) -> UnifiClient {
         let client = reqwest::Client::builder()
             // The SSL cert is self-signed and untrusted

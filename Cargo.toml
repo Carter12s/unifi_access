@@ -1,6 +1,6 @@
 [package]
 name = "unifi_access"
-version = "0.1.1"
+version = "0.1.2"
 authors = [ "carter <carterjschultz@gmail.com>"]
 license = "MIT"
 readme = "README.md"
@@ -14,7 +14,10 @@ reqwest = "0.12"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 # Tokio is only lightly used, could be removed
-tokio = { version = "1.37", features = ["macros"] }
+tokio = { version = "1.37" }
 simple-error = "0.3"
 # TODO this might be removed, currently required by original application this was forked from
 ts-rs = "8.1"
+
+[dev-dependencies]
+tokio = { version = "1.37", features = ["macros", "rt-multi-thread"] }
