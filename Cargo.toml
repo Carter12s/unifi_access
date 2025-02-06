@@ -6,6 +6,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Carter12s/unifi_access"
 edition = "2021"
+description = "A client library for unifi's door access api."
 
 [dependencies]
 log = "0.4"
