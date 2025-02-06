@@ -1,6 +1,6 @@
 [package]
 name = "unifi_access"
-version = "0.1.0"
+version = "0.1.1"
 authors = [ "carter <carterjschultz@gmail.com>"]
 license = "MIT"
 readme = "README.md"
