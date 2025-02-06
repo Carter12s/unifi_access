@@ -20,4 +20,6 @@ https://core-config-gfoz.uid.alpha.ui.com/configs/unifi-access/api_reference.pdf
 
 See the [docs](https://docs.rs/unifi_access/latest/unifi_access/) for more information.
 
+If you are looking for a client for Unifi Network API checkout: https://github.com/CallumTeesdale/unifi-rs
+
 Contributions welcome!
