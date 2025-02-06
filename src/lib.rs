@@ -1,3 +1,30 @@
+/// # Unifi Access API Client
+///
+/// This crate provides a client for the Unifi Access API based off of the documentation found here:
+/// https://core-config-gfoz.uid.alpha.ui.com/configs/unifi-access/api_reference.pdf
+///
+/// This crate is a hand written wrapper of the described REST API, and is incomplete in coverage at the moment.
+/// This crate was developed to support a Makerspace door access system and is being happily used in production for that application.
+///
+/// Contributions to extend the functionality are welcome.
+///
+/// To get started login to your Unifi Controller and go to:
+/// Settings -> Security -> Advanced and create a new token. There is a link to the documentation for the API alongside the token.
+///
+/// The API is only available on the LAN network of the controller, if you want to access the API from offsite you'll need to establish a VPN.
+///
+/// A basic example:
+/// ```no_run
+/// use unifi_access::UnifiClient;
+/// #[tokio::main(flavor = "current_thread")]
+/// async fn main() {
+///   let client = UnifiClient::new("192.168.1.1", "your_auth_token");
+///   let users = client.get_all_users().await.unwrap();
+///   println!("{users:?}");
+/// }
+/// ```
+///
+/// The API is fully async and technically relies on `tokio`, but tokio could be removed if folks want a different runtime.
 use std::sync::Mutex;
 
 use log::*;
@@ -6,12 +33,15 @@ use serde_json::json;
 use simple_error::bail;
 use ts_rs::TS;
 
+/// The base client object that operations are provided on.
 pub struct UnifiClient {
     client: reqwest::Client,
     auth_token: String,
     host: String,
 }
 
+/// Represents a user in the unifi system.
+/// This is used with serde_json to serialize and deserialize the JSON responses from the API.
 #[derive(Debug, Serialize, Deserialize, Clone, TS)]
 pub struct User {
     /// ID is in the form of a uuid
@@ -27,6 +57,7 @@ pub struct User {
     pub access_policies: Option<Vec<AccessPolicy>>,
 }
 
+/// Represents an NFC card in the unifi system.
 #[derive(Debug, Serialize, Deserialize, Clone, TS)]
 pub struct NfcCard {
     /// Display name of the card in UI
@@ -35,6 +66,7 @@ pub struct NfcCard {
     pub token: String,
 }
 
+/// The response format for a list of users
 #[derive(Debug, Deserialize)]
 pub struct UsersResponse {
     pub data: Vec<User>,
@@ -42,7 +74,7 @@ pub struct UsersResponse {
 }
 
 /// This is the standard response format for all endpoints
-/// TODO make enum for code
+// TODO make enum for code
 #[derive(Debug, Deserialize)]
 struct GenericResponse {
     pub data: Option<serde_json::Value>,
@@ -50,6 +82,7 @@ struct GenericResponse {
     pub code: String,
 }
 
+/// Represents an access policy in the unifi system
 #[derive(Debug, Deserialize, Serialize, Clone, TS)]
 pub struct AccessPolicy {
     // UUID of the policy
@@ -116,7 +149,10 @@ pub struct SystemLogResponse {
     // total: u32,
 }
 
+/// The error type for this crate
 type UnifiError = Box<dyn std::error::Error + Send + Sync>;
+
+/// The result type for this crate
 type UnifiResult<T> = Result<T, UnifiError>;
 
 impl UnifiClient {
@@ -142,6 +178,7 @@ impl UnifiClient {
         }
     }
 
+    /// Internal function that wraps all requests
     async fn generic_request_raw(
         &self,
         method: reqwest::Method,
@@ -164,7 +201,7 @@ impl UnifiClient {
         Ok(response)
     }
 
-    /// Generically hits and endpoint and handles the response code
+    /// Generically hits an endpoint and handles the response code without deserializing the "data" field
     async fn generic_request_no_parse(
         &self,
         method: reqwest::Method,
@@ -197,9 +234,9 @@ impl UnifiClient {
         )?)?)
     }
 
-    /// Gets a list of all users
-    /// Endpoint supports partial fetches and pagination, not using those yet
-    /// Endpoint supports optionally getting access policy info, not impled yet
+    /// Gets a list of all users.
+    /// Endpoint supports partial fetches and pagination, not using those yet.
+    /// Endpoint supports optionally getting access policy info, not implementing that yet.
     pub async fn get_all_users(&self) -> UnifiResult<Vec<User>> {
         self.generic_request(
             reqwest::Method::GET,
@@ -209,7 +246,8 @@ impl UnifiClient {
         .await
     }
 
-    /// The same as get_all_users but also collects the access policies for each user
+    /// The same as get_all_users but also collects the access policies for each user.
+    /// Does so by making an additional request for each user, can be slow for large numbers of users.
     pub async fn get_all_users_with_access_information(&self) -> UnifiResult<Vec<User>> {
         let mut users = self.get_all_users().await?;
         for user in users.iter_mut() {
@@ -250,7 +288,7 @@ impl UnifiClient {
         Ok(id.to_string())
     }
 
-    // Retrieves the list of access policies
+    /// Retrieves the list of access policies
     pub async fn get_all_access_policies(&self) -> UnifiResult<Vec<AccessPolicy>> {
         debug!("Sending get_all_access_policies_request");
         self.generic_request(
@@ -272,7 +310,7 @@ impl UnifiClient {
         .await
     }
 
-    /// Not working currently needs some debug
+    /// Assigns an access policy to a user
     pub async fn assign_access_policies(
         &self,
         user_id: &str,
@@ -488,6 +526,7 @@ impl UnifiClient {
         Ok(())
     }
 
+    /// Ends an ongoing enrollment session
     pub async fn end_enrollment_session(&self, session_id: &str) -> UnifiResult<()> {
         self.generic_request_no_parse(
             reqwest::Method::DELETE,
